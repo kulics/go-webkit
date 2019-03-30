@@ -12,6 +12,7 @@ import (
 
 // Form 表单类型
 type Form map[string]interface{}
+type responseHandle = func(resp http.Response) error
 
 const (
 	ContentTypeForm = "application/x-www-form-urlencoded"
@@ -61,7 +62,8 @@ func mapToParams(params Form) (io.Reader, error) {
 }
 
 // FormRequest 表单请求
-func (sf *WebClient) FormRequest(method Method, relativePath string, params Form) ([]byte, error) {
+func (sf *WebClient) FormRequest(method Method, relativePath string, params Form,
+	responseHanlde ...responseHandle) ([]byte, error) {
 	reader, err := mapToParams(params)
 	if err != nil {
 		return nil, err
@@ -71,32 +73,43 @@ func (sf *WebClient) FormRequest(method Method, relativePath string, params Form
 		return nil, err
 	}
 	defer resp.Body.Close()
+	for _, v := range responseHanlde {
+		err = v(*resp)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return ioutil.ReadAll(resp.Body)
 }
 
 // FormGET 表单get
-func (sf *WebClient) FormGET(relativePath string, params Form) ([]byte, error) {
+func (sf *WebClient) FormGET(relativePath string, params Form,
+	responseHanlde ...responseHandle) ([]byte, error) {
 	return sf.FormRequest(GET, relativePath, params)
 }
 
 // FormPOST 表单post
-func (sf *WebClient) FormPOST(relativePath string, params Form) ([]byte, error) {
+func (sf *WebClient) FormPOST(relativePath string, params Form,
+	responseHanlde ...responseHandle) ([]byte, error) {
 	return sf.FormRequest(POST, relativePath, params)
 }
 
 // FormPUT 表单put
-func (sf *WebClient) FormPUT(relativePath string, params Form) ([]byte, error) {
+func (sf *WebClient) FormPUT(relativePath string, params Form,
+	responseHanlde ...responseHandle) ([]byte, error) {
 	return sf.FormRequest(PUT, relativePath, params)
 }
 
 // FormDELETE 表单delete
-func (sf *WebClient) FormDELETE(relativePath string, params Form) ([]byte, error) {
+func (sf *WebClient) FormDELETE(relativePath string, params Form,
+	responseHanlde ...responseHandle) ([]byte, error) {
 	return sf.FormRequest(DELETE, relativePath, params)
 }
 
 // JSONRequest JSON请求
 func (sf *WebClient) JSONRequest(method Method, relativePath string,
-	params interface{}, response interface{}) error {
+	params interface{}, response interface{},
+	responseHanlde ...responseHandle) error {
 	bt, err := json.Marshal(params)
 	if err != nil {
 		return err
@@ -106,6 +119,12 @@ func (sf *WebClient) JSONRequest(method Method, relativePath string,
 		return err
 	}
 	defer resp.Body.Close()
+	for _, v := range responseHanlde {
+		err = v(*resp)
+		if err != nil {
+			return err
+		}
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -115,24 +134,28 @@ func (sf *WebClient) JSONRequest(method Method, relativePath string,
 
 // JSONGET JSON get
 func (sf *WebClient) JSONGET(relativePath string,
-	params interface{}, response interface{}) error {
+	params interface{}, response interface{},
+	responseHanlde ...responseHandle) error {
 	return sf.JSONRequest(GET, relativePath, params, response)
 }
 
 // JSONPOST JSON post
 func (sf *WebClient) JSONPOST(relativePath string,
-	params interface{}, response interface{}) error {
+	params interface{}, response interface{},
+	responseHanlde ...responseHandle) error {
 	return sf.JSONRequest(POST, relativePath, params, response)
 }
 
 // JSONPUT JSON put
 func (sf *WebClient) JSONPUT(relativePath string,
-	params interface{}, response interface{}) error {
+	params interface{}, response interface{},
+	responseHanlde ...responseHandle) error {
 	return sf.JSONRequest(PUT, relativePath, params, response)
 }
 
 // JSONDELETE JSON delete
 func (sf *WebClient) JSONDELETE(relativePath string,
-	params interface{}, response interface{}) error {
+	params interface{}, response interface{},
+	responseHanlde ...responseHandle) error {
 	return sf.JSONRequest(DELETE, relativePath, params, response)
 }
