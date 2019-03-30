@@ -31,7 +31,7 @@ func NewWebClient(domain string, port string) *WebClient {
 
 // HTTPRequest http请求
 func (sf *WebClient) HTTPRequest(method Method, relativePath string,
-	contentType string, params io.Reader) ([]byte, error) {
+	contentType string, params io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest(method.String(), sf.host+relativePath, params)
 	if err != nil {
 		return nil, err
@@ -39,13 +39,7 @@ func (sf *WebClient) HTTPRequest(method Method, relativePath string,
 	req.Header.Set("Content-Type", contentType)
 
 	// req.Header.Set("Cookie", "name=anny")
-
-	resp, err := sf.cli.Do(req)
-	if err != nil {
-		return nil, nil
-	}
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	return sf.cli.Do(req)
 }
 
 // mapToParams 将map转换为参数
@@ -72,7 +66,12 @@ func (sf *WebClient) FormRequest(method Method, relativePath string, params Form
 	if err != nil {
 		return nil, err
 	}
-	return sf.HTTPRequest(method, relativePath, ContentTypeForm, reader)
+	resp, err := sf.HTTPRequest(method, relativePath, ContentTypeForm, reader)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
 }
 
 // FormGET 表单get
@@ -102,7 +101,12 @@ func (sf *WebClient) JSONRequest(method Method, relativePath string,
 	if err != nil {
 		return err
 	}
-	body, err := sf.HTTPRequest(method, relativePath, ContentTypeForm, bytes.NewReader(bt))
+	resp, err := sf.HTTPRequest(method, relativePath, ContentTypeJSON, bytes.NewReader(bt))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
