@@ -24,16 +24,16 @@ type testRouter struct {
 	Item testItem
 }
 
-func (testRouter) Get(ctx go_webkit.Context) {
+func (testRouter) GET(ctx go_webkit.Context) {
 	ctx.String(http.StatusOK, "get")
 }
 
-func (testRouter) Post(ctx go_webkit.Context) {
+func (testRouter) POST(ctx go_webkit.Context) {
 	ctx.String(http.StatusOK, "post")
 }
 
 type testItem struct{}
 
-func (testItem) Get(ctx go_webkit.Context) {
+func (testItem) GET(ctx go_webkit.Context) {
 	ctx.String(http.StatusOK, "get")
 }

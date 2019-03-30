@@ -4,12 +4,12 @@ package go_webkit
 type Method string
 
 const (
-	Get     Method = "Get"
-	Post    Method = "Post"
-	Put     Method = "Put"
-	Delete  Method = "Delete"
-	Patch   Method = "Patch"
-	Options Method = "Options"
+	GET     Method = "GET"
+	POST    Method = "POST"
+	PUT     Method = "PUT"
+	DELETE  Method = "DELETE"
+	PATCH   Method = "PATCH"
+	OPTIONS Method = "OPTIONS"
 )
 
 // NewMethod Method构建函数
@@ -17,20 +17,24 @@ func NewMethod(v string) Method {
 	return Method(v)
 }
 
+func (sf Method) String() string {
+	return string(sf)
+}
+
 // isMethod 判断是否存在的方法
 func isMethod(m Method) (b bool) {
 	switch m {
-	case Get:
+	case GET:
 		fallthrough
-	case Post:
+	case POST:
 		fallthrough
-	case Put:
+	case PUT:
 		fallthrough
-	case Delete:
+	case DELETE:
 		fallthrough
-	case Patch:
+	case PATCH:
 		fallthrough
-	case Options:
+	case OPTIONS:
 		b = true
 	}
 	return

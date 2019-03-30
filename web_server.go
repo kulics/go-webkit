@@ -31,17 +31,17 @@ func (sf *WebServer) Run() error {
 // HandleFunc 监听函数
 func (sf *WebServer) HandleFunc(method Method, relativePath string, handle func(ctx Context)) *WebServer {
 	switch method {
-	case Get:
+	case GET:
 		sf.engine.GET(relativePath, handle)
-	case Post:
+	case POST:
 		sf.engine.POST(relativePath, handle)
-	case Put:
+	case PUT:
 		sf.engine.PUT(relativePath, handle)
-	case Delete:
+	case DELETE:
 		sf.engine.DELETE(relativePath, handle)
-	case Patch:
+	case PATCH:
 		sf.engine.PATCH(relativePath, handle)
-	case Options:
+	case OPTIONS:
 		sf.engine.OPTIONS(relativePath, handle)
 	}
 	return sf
@@ -49,32 +49,32 @@ func (sf *WebServer) HandleFunc(method Method, relativePath string, handle func(
 
 // HandleFuncGet 监听Get
 func (sf *WebServer) HandleFuncGet(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(Get, relativePath, handle)
+	return sf.HandleFunc(GET, relativePath, handle)
 }
 
 // HandleFuncPost 监听Post
 func (sf *WebServer) HandleFuncPost(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(Post, relativePath, handle)
+	return sf.HandleFunc(POST, relativePath, handle)
 }
 
 // HandleFuncPut 监听Put
 func (sf *WebServer) HandleFuncPut(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(Put, relativePath, handle)
+	return sf.HandleFunc(PUT, relativePath, handle)
 }
 
 // HandleFuncDelete 监听Delete
 func (sf *WebServer) HandleFuncDelete(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(Delete, relativePath, handle)
+	return sf.HandleFunc(DELETE, relativePath, handle)
 }
 
 // HandleFuncPatch 监听Patch
 func (sf *WebServer) HandleFuncPatch(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(Patch, relativePath, handle)
+	return sf.HandleFunc(PATCH, relativePath, handle)
 }
 
 // HandleFuncOptions 监听Options
 func (sf *WebServer) HandleFuncOptions(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(Options, relativePath, handle)
+	return sf.HandleFunc(OPTIONS, relativePath, handle)
 }
 
 // HandleStruct 监听结构体，反射街头的http方法以及遍历每个字段的http方法，实现REST形式的API服务
