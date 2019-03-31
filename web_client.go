@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -30,6 +31,22 @@ type WebClient struct {
 // NewWebClient WebClient构造函数
 func NewWebClient(domain string, port string) *WebClient {
 	return &WebClient{fmt.Sprintf("%s:%s", domain, port), &http.Client{}}
+}
+
+// Cookies 根据域名获取cookies
+func (sf *WebClient) Cookies(u *url.URL) []*http.Cookie {
+	return sf.cli.Jar.Cookies(u)
+}
+
+// SetCookie 根据域名设置单条cookie
+func (sf *WebClient) SetCookie(u *url.URL, name, value string) {
+	sf.cli.Jar.SetCookies(u,
+		[]*http.Cookie{&http.Cookie{Name: name, Value: value, HttpOnly: true}})
+}
+
+// SetCookies 根据域名设置cookies
+func (sf *WebClient) SetCookies(u *url.URL, cookies []*http.Cookie) {
+	sf.cli.Jar.SetCookies(u, cookies)
 }
 
 // HTTPRequest http请求
