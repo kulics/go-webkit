@@ -1,10 +1,13 @@
 package go_webkit
 
-import "testing"
+import (
+	"testing"
+	"fmt"
+)
 
 func TestBenchMarkSingleAPI(t *testing.T) {
-	bm := NewWebBenchMark("http://baidu.com", "80")
-	bm.RunSingleAPI("", 100, 10, 1000, func(index int) {
-		t.Log(index)
+	bm := NewWebBenchMark("http://localhost:8080/")
+	bm.RunSingleAPI("ping", 10, 3, 1000, func(index int) {
+		fmt.Println(index)
 	})
 }

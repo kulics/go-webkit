@@ -14,18 +14,17 @@ type WebBenchMark struct {
 }
 
 // NewWebBenchMark 构建基准测试函数
-func NewWebBenchMark(domain string, port string) *WebBenchMark {
-	return &WebBenchMark{fmt.Sprintf("%s:%s", domain, port)}
+func NewWebBenchMark(host string) *WebBenchMark {
+	return &WebBenchMark{host}
 }
 
 // RunSingleAPI 单个API基准测试
 func (sf *WebBenchMark) RunSingleAPI(relativePath string, tps int, rounds int, interval time.Duration, task task) {
 	apiFunc := func(index int) {
-		cli := NewWebClient(sf.host, "")
-		body, err := cli.FormGET("", nil)
+		cli := NewWebClient(sf.host)
+		body, err := cli.FormGET(relativePath, nil)
 		if err != nil {
 			fmt.Println(err)
-			// return nil, err
 			return
 		}
 		fmt.Println(string(body))

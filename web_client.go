@@ -29,8 +29,8 @@ type WebClient struct {
 }
 
 // NewWebClient WebClient构造函数
-func NewWebClient(domain string, port string) *WebClient {
-	return &WebClient{fmt.Sprintf("%s:%s", domain, port), &http.Client{}}
+func NewWebClient(host string) *WebClient {
+	return &WebClient{host, &http.Client{}}
 }
 
 // Cookies 根据域名获取cookies
@@ -66,7 +66,8 @@ func (sf *WebClient) SetCookies(rawURL string, cookies []*http.Cookie) error {
 // HTTPRequest http请求
 func (sf *WebClient) HTTPRequest(method Method, relativePath string,
 	contentType string, params io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest(method.String(), sf.host+relativePath, params)
+	req, err := http.NewRequest(method.String(),
+		sf.host+relativePath, params)
 	if err != nil {
 		return nil, err
 	}

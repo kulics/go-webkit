@@ -1,7 +1,6 @@
 package go_webkit
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -13,19 +12,19 @@ type Context = *gin.Context
 
 // WebServer web服务辅助工具
 type WebServer struct {
-	host   string
+	listen string
 	engine *gin.Engine
 }
 
 // NewWebServerDefault 构建web服务数据对象
 // domain可以为空
-func NewWebServerDefault(domain string, port string) *WebServer {
-	return &WebServer{fmt.Sprintf("%s:%s", domain, port), gin.Default()}
+func NewWebServerDefault(listen string) *WebServer {
+	return &WebServer{listen, gin.Default()}
 }
 
 // Run 运行web服务
 func (sf *WebServer) Run() error {
-	return sf.engine.Run(sf.host)
+	return sf.engine.Run(sf.listen)
 }
 
 // HandleFunc 监听函数

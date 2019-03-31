@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	err := go_webkit.NewWebServerDefault("", "8080").
+	err := go_webkit.NewWebServerDefault("localhost:8080").
 		HandleFuncGet("ping", func(ctx go_webkit.Context) {
 			ctx.String(http.StatusOK, "pong")
 		}).
