@@ -43,7 +43,7 @@ func (sf *WebClient) Cookies(rawURL string) ([]*http.Cookie, error) {
 }
 
 // SetCookie 根据域名设置单条cookie
-func (sf *WebClient) SetCookie(rawURL string, name, value string) error {
+func (sf *WebClient) SetCookie(rawURL string, name string, value string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return err
@@ -195,7 +195,8 @@ type FileInfo struct {
 }
 
 // FileUpload 文件上传方法
-func (sf *WebClient) FileUpload(relativePath, field, path string, params map[string]string,
+func (sf *WebClient) FileUpload(relativePath string, field string,
+	path string, params map[string]string,
 	handles ...responseHandle) ([]byte, error) {
 	fileBuffer := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(fileBuffer)
