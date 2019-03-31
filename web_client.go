@@ -34,19 +34,33 @@ func NewWebClient(domain string, port string) *WebClient {
 }
 
 // Cookies 根据域名获取cookies
-func (sf *WebClient) Cookies(u *url.URL) []*http.Cookie {
-	return sf.cli.Jar.Cookies(u)
+func (sf *WebClient) Cookies(rawURL string) ([]*http.Cookie, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	return sf.cli.Jar.Cookies(u), nil
 }
 
 // SetCookie 根据域名设置单条cookie
-func (sf *WebClient) SetCookie(u *url.URL, name, value string) {
+func (sf *WebClient) SetCookie(rawURL string, name, value string) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return err
+	}
 	sf.cli.Jar.SetCookies(u,
 		[]*http.Cookie{&http.Cookie{Name: name, Value: value, HttpOnly: true}})
+	return nil
 }
 
 // SetCookies 根据域名设置cookies
-func (sf *WebClient) SetCookies(u *url.URL, cookies []*http.Cookie) {
+func (sf *WebClient) SetCookies(rawURL string, cookies []*http.Cookie) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return err
+	}
 	sf.cli.Jar.SetCookies(u, cookies)
+	return nil
 }
 
 // HTTPRequest http请求
