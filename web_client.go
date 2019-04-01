@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"os"
 	"strings"
@@ -24,13 +25,20 @@ const (
 
 // WebClient web请求辅助工具
 type WebClient struct {
-	host string
-	cli  *http.Client
+	host  string
+	token string
+	cli   *http.Client
 }
 
 // NewWebClient WebClient构造函数
 func NewWebClient(host string) *WebClient {
-	return &WebClient{host, &http.Client{}}
+	jar, _ := cookiejar.New(nil)
+	return &WebClient{host, "", &http.Client{Jar: jar}}
+}
+
+// SetToken 设置token
+func (sf *WebClient) SetToken(token string) {
+	sf.token = token
 }
 
 // Cookies 根据域名获取cookies
@@ -73,6 +81,10 @@ func (sf *WebClient) HTTPRequest(method Method, relativePath string,
 	}
 	req.Header.Set("Content-Type", contentType)
 
+	if sf.token != "" {
+		req.Header.Set("X-Access-Token", sf.token)
+	}
+
 	// req.Header.Set("Cookie", "name=anny")
 	return sf.cli.Do(req)
 }
@@ -93,32 +105,15 @@ func (sf *WebClient) processRequest(method Method, relativePath string,
 	return ioutil.ReadAll(resp.Body)
 }
 
-// mapToParams 将map转换为参数
-func mapToParams(params Form) (io.Reader, error) {
-	data := make([]string, 0)
-	for k, v := range params {
-		if s, ok := v.(string); ok {
-			data = append(data, fmt.Sprintf("%s=%v", k, s))
-			continue
-		}
-		b, err := json.Marshal(v)
-		if err != nil {
-			return nil, err
-		}
-		data = append(data, fmt.Sprintf("%s=%s", k, string(b)))
-	}
-
-	return strings.NewReader(strings.Join(data, "&")), nil
-}
-
 // FormRequest 表单请求
 func (sf *WebClient) FormRequest(method Method, relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
-	reader, err := mapToParams(params)
-	if err != nil {
-		return nil, err
+	forms := url.Values{}
+	for k, v := range params {
+		forms.Add(k, fmt.Sprint(v))
 	}
-	return sf.processRequest(method, relativePath, ContentTypeForm, reader, handles...)
+	return sf.processRequest(method, relativePath, ContentTypeForm,
+		strings.NewReader(forms.Encode()), handles...)
 }
 
 // FormGET 表单get

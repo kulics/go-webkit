@@ -20,7 +20,7 @@ func NewWebBenchMark(host string) *WebBenchMark {
 
 // RunSingleAPI 单个API基准测试
 func (sf *WebBenchMark) RunSingleAPI(relativePath string, tps int, rounds int, interval time.Duration,
-	task taskFunc) map[int]*RoundCount {
+	task taskFunc) BenchMarkCount {
 	apiFunc := func(index int) error {
 		cli := NewWebClient(sf.host)
 		body, err := cli.FormGET(relativePath, nil)
@@ -31,14 +31,21 @@ func (sf *WebBenchMark) RunSingleAPI(relativePath string, tps int, rounds int, i
 		fmt.Println(string(body))
 		return task(index)
 	}
-	return runBenchMark(tps, rounds, interval, apiFunc)
+	return RunBenchMark(tps, rounds, interval, apiFunc)
+}
+
+// BenchMarkCount 基准测试统计
+type BenchMarkCount struct {
+	Begin      time.Time
+	End        time.Time
+	RoundCount map[int]*RoundCount
 }
 
 // RoundCount 单轮统计
 type RoundCount struct {
 	Begin      time.Time
 	End        time.Time
-	TaskCounts *map[int]*TaskCount
+	TaskCounts map[int]*TaskCount
 }
 
 // TaskCount 单次统计
@@ -48,8 +55,8 @@ type TaskCount struct {
 	Status bool
 }
 
-// runBenchMark 一次基准测试
-func runBenchMark(tps int, rounds int, interval time.Duration, task taskFunc) map[int]*RoundCount {
+// RunBenchMark 一次基准测试
+func RunBenchMark(tps int, rounds int, interval time.Duration, task taskFunc) BenchMarkCount {
 	benchMarkBegin := time.Now()
 	wg := new(sync.WaitGroup)
 	wg.Add(rounds)
@@ -61,8 +68,7 @@ func runBenchMark(tps int, rounds int, interval time.Duration, task taskFunc) ma
 	}
 	wg.Wait()
 	benchMarkEnd := time.Now()
-	fmt.Println(fmt.Sprintf("begin:%s  ->  end:%s", benchMarkBegin.String(), benchMarkEnd.String()))
-	return roundCount
+	return BenchMarkCount{benchMarkBegin, benchMarkEnd, roundCount}
 }
 
 // runRound 一轮并发
@@ -76,7 +82,7 @@ func runRound(index int, countMap map[int]*RoundCount, tps int, wg *sync.WaitGro
 	}
 	roundWG.Wait()
 	roundEnd := time.Now()
-	countMap[index] = &RoundCount{roundBegin, roundEnd, &taskCount}
+	countMap[index] = &RoundCount{roundBegin, roundEnd, taskCount}
 	wg.Done()
 }
 
