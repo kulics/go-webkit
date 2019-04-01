@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kulics/go_webkit"
 )
 
@@ -13,6 +15,7 @@ func main() {
 			ctx.String(http.StatusOK, "pong")
 		}).
 		HandleStruct("api", testRouter{}).
+		HandleStruct("file", fileRouter{}).
 		Run()
 	if err != nil {
 		fmt.Println(err)
@@ -36,4 +39,27 @@ type testItem struct{}
 
 func (testItem) GET(ctx go_webkit.Context) {
 	ctx.String(http.StatusOK, "get")
+}
+
+type fileRouter struct{}
+
+func (fileRouter) POST(ctx go_webkit.Context) {
+	filePath := filepath.Clean(ctx.PostForm("path"))
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "upload file err:" + err.Error(),
+		})
+		return
+	}
+	if err := ctx.SaveUploadedFile(file, `/Users/kulics/Documents/workspace_go/src/github.com/kulics/go_webkit/example/`+
+		filePath); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "upload file err:"+ err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "success",
+	})
 }

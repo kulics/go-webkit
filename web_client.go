@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"path/filepath"
 )
 
 // Form 表单类型
@@ -91,7 +92,7 @@ func (sf *WebClient) HTTPRequest(method Method, relativePath string,
 
 func (sf *WebClient) processRequest(method Method, relativePath string,
 	contentType string, params io.Reader, handles ...responseHandle) ([]byte, error) {
-	resp, err := sf.HTTPRequest(method, relativePath, ContentTypeForm, params)
+	resp, err := sf.HTTPRequest(method, relativePath, contentType, params)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +197,7 @@ func (sf *WebClient) FileUpload(relativePath string, field string,
 	handles ...responseHandle) ([]byte, error) {
 	fileBuffer := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(fileBuffer)
-	fileWriter, err := bodyWriter.CreateFormFile(field, path)
+	fileWriter, err := bodyWriter.CreateFormFile(field, filepath.Base(path))
 	if err != nil {
 		return nil, err
 	}
@@ -216,7 +217,10 @@ func (sf *WebClient) FileUpload(relativePath string, field string,
 			return nil, err
 		}
 	}
-	bodyWriter.Close()
+	err = bodyWriter.Close()
+	if err != nil {
+		return nil,err
+	}
 
 	return sf.processRequest(POST, relativePath, bodyWriter.FormDataContentType(),
 		fileBuffer, handles...)
