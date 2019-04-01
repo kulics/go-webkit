@@ -19,7 +19,7 @@ func TestFileUpload(t *testing.T) {
 func TestFileDownload(t *testing.T) {
 	cli := NewWebClient("http://localhost:8080/")
 	err := cli.FileDownload(
-		"file?path=./main.go",
+		"file?path=../web_client.go",
 		"./tempFile", map[string]interface{}{})
 	if err != nil {
 		fmt.Println(err)

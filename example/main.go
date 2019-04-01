@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"github.com/kulics/go_webkit"
 	"path/filepath"
+
 	"github.com/gin-gonic/gin"
+	"github.com/kulics/go_webkit"
 )
 
 func main() {
@@ -44,8 +45,7 @@ type fileRouter struct{}
 
 func (fileRouter) GET(ctx go_webkit.Context) {
 	fPath := ctx.Query("path")
-	fmt.Println(fPath)
-	ctx.File(fPath)
+	ctx.File(filepath.Clean(fPath))
 }
 
 func (fileRouter) POST(ctx go_webkit.Context) {
