@@ -1,7 +1,6 @@
 package go_webkit
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -10,26 +9,19 @@ type taskFunc = func(index int) error
 
 // WebBenchMark 基准测试类型
 type WebBenchMark struct {
-	host string
+	cli *WebClient
 }
 
 // NewWebBenchMark 构建基准测试函数
-func NewWebBenchMark(host string) *WebBenchMark {
-	return &WebBenchMark{host}
+func NewWebBenchMark(cli *WebClient) *WebBenchMark {
+	return &WebBenchMark{cli}
 }
 
 // RunSingleAPI 单个API基准测试
 func (sf *WebBenchMark) RunSingleAPI(relativePath string, tps int, rounds int, interval time.Duration,
-	task taskFunc) BenchMarkCount {
+	req func(cli *WebClient, index int) error) BenchMarkCount {
 	apiFunc := func(index int) error {
-		cli := NewWebClient(sf.host)
-		body, err := cli.FormGET(relativePath, nil)
-		if err != nil {
-			fmt.Println(err)
-			return err
-		}
-		fmt.Println(string(body))
-		return task(index)
+		return req(sf.cli, index)
 	}
 	return RunBenchMark(tps, rounds, interval, apiFunc)
 }
