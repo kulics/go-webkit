@@ -193,7 +193,7 @@ type FileInfo struct {
 
 // FileUpload 文件上传方法
 func (sf *WebClient) FileUpload(relativePath string, field string,
-	path string, params map[string]string,
+	path string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	fileBuffer := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(fileBuffer)
@@ -212,16 +212,42 @@ func (sf *WebClient) FileUpload(relativePath string, field string,
 		return nil, err
 	}
 	for k, v := range params {
-		err = bodyWriter.WriteField(k, v)
+		err = bodyWriter.WriteField(k, fmt.Sprint(v))
 		if err != nil {
 			return nil, err
 		}
 	}
 	err = bodyWriter.Close()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	return sf.processRequest(POST, relativePath, bodyWriter.FormDataContentType(),
 		fileBuffer, handles...)
+}
+
+// FileDownload 文件下载方法
+func (sf *WebClient) FileDownload(relativePath string, savePath string,
+	params Form, handles ...responseHandle) error {
+	body, err := sf.FormGET(relativePath, params)
+	if err != nil {
+		return err
+	}
+	// 创建文件夹
+	if err := os.MkdirAll(filepath.Dir(savePath), os.ModePerm); err != nil {
+		return err
+	}
+	// 写入临时文件
+	f, err := ioutil.TempFile(filepath.Dir(savePath), filepath.Base(savePath)+"_temp")
+	if err != nil {
+		return err
+	}
+	if _, err := f.Write(body); err != nil {
+		f.Close()
+		os.Remove(f.Name())
+		return err
+	}
+	f.Close()
+	// 将临时文件重命名为目标文件
+	return os.Rename(f.Name(), savePath)
 }
