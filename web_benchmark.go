@@ -18,7 +18,7 @@ func NewWebBenchMark(cli *WebClient) *WebBenchMark {
 }
 
 // RunSingleAPI 单个API基准测试
-func (sf *WebBenchMark) RunSingleAPI(relativePath string, tps int, rounds int, interval time.Duration,
+func (sf *WebBenchMark) RunSingleAPI(tps int, rounds int, interval time.Duration,
 	req func(cli *WebClient, index int) error) BenchMarkCount {
 	apiFunc := func(index int) error {
 		return req(sf.cli, index)
