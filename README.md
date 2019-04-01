@@ -13,6 +13,7 @@ Convenient web toolkit for go
 - http基准测试
 - 请求设置token
 - 普通函数路由
+- 请求cookies设置
 ## Todo
 - 简单ORM
 - 数据库连接工具
