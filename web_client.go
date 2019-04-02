@@ -11,8 +11,8 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"strings"
 	"path/filepath"
+	"strings"
 )
 
 // Form 表单类型
@@ -74,7 +74,8 @@ func (sf *WebClient) SetCookies(rawURL string, cookies []*http.Cookie) error {
 
 // HTTPRequest http请求
 func (sf *WebClient) HTTPRequest(method Method, relativePath string,
-	contentType string, params io.Reader) (*http.Response, error) {
+	contentType string, params io.Reader,
+	header map[string]interface{}) (*http.Response, error) {
 	req, err := http.NewRequest(method.String(),
 		sf.host+relativePath, params)
 	if err != nil {
@@ -86,13 +87,16 @@ func (sf *WebClient) HTTPRequest(method Method, relativePath string,
 		req.Header.Set("X-Access-Token", sf.token)
 	}
 
-	// req.Header.Set("Cookie", "name=anny")
+	for k, v := range header {
+		req.Header.Set(k, fmt.Sprint(v))
+	}
+
 	return sf.cli.Do(req)
 }
 
 func (sf *WebClient) processRequest(method Method, relativePath string,
 	contentType string, params io.Reader, handles ...responseHandle) ([]byte, error) {
-	resp, err := sf.HTTPRequest(method, relativePath, contentType, params)
+	resp, err := sf.HTTPRequest(method, relativePath, contentType, params, nil)
 	if err != nil {
 		return nil, err
 	}
