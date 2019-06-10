@@ -1,4 +1,4 @@
-package go_webkit
+package webkit
 
 // Method http方法类型
 type Method string

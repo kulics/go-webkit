@@ -1,4 +1,4 @@
-package go_webkit
+package webkit
 
 import (
 	"encoding/json"

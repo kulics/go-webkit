@@ -10,8 +10,8 @@ import (
 )
 
 func main() {
-	err := go_webkit.NewWebServerDefault("localhost:8080").
-		HandleFuncGet("ping", func(ctx go_webkit.Context) {
+	err := webkit.NewWebServerDefault("localhost:8080").
+		HandleFuncGet("ping", func(ctx webkit.Context) {
 			ctx.String(http.StatusOK, "pong")
 		}).
 		HandleStruct("api", testRouter{}).
@@ -27,28 +27,28 @@ type testRouter struct {
 	Item testItem
 }
 
-func (testRouter) GET(ctx go_webkit.Context) {
+func (testRouter) GET(ctx webkit.Context) {
 	ctx.String(http.StatusOK, "get")
 }
 
-func (testRouter) POST(ctx go_webkit.Context) {
+func (testRouter) POST(ctx webkit.Context) {
 	ctx.String(http.StatusOK, "post")
 }
 
 type testItem struct{}
 
-func (testItem) GET(ctx go_webkit.Context) {
+func (testItem) GET(ctx webkit.Context) {
 	ctx.String(http.StatusOK, "get")
 }
 
 type fileRouter struct{}
 
-func (fileRouter) GET(ctx go_webkit.Context) {
+func (fileRouter) GET(ctx webkit.Context) {
 	fPath := ctx.Query("path")
 	ctx.File(filepath.Clean(fPath))
 }
 
-func (fileRouter) POST(ctx go_webkit.Context) {
+func (fileRouter) POST(ctx webkit.Context) {
 	filePath := filepath.Clean(ctx.PostForm("path"))
 	file, err := ctx.FormFile("file")
 	if err != nil {
