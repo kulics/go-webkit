@@ -1,92 +1,73 @@
 package webkit
 
-import (
-	"sync"
-	"time"
-)
+import "sync"
+import "time"
 
-type taskFunc = func(index int) error
-
-// WebBenchMark 基准测试类型
-type WebBenchMark struct {
+type taskFunc = func(int) error
+type Web_Benchmark struct {
 	cli *WebClient
 }
 
-// NewWebBenchMark 构建基准测试函数
-func NewWebBenchMark(cli *WebClient) *WebBenchMark {
-	return &WebBenchMark{cli}
+func New_Web_Benchmark(cli *WebClient) (v *Web_Benchmark) {
+	return &Web_Benchmark{cli}
 }
-
-// RunSingleAPI 单个API基准测试
-func (sf *WebBenchMark) RunSingleAPI(tps int, rounds int, interval time.Duration,
-	req func(cli *WebClient, index int) error) BenchMarkCount {
-	apiFunc := func(index int) error {
-		return req(sf.cli, index)
+func (me *Web_Benchmark) Run_Single_API(tps int, rounds int, interval time.Duration, req func(*WebClient, int) error) (count Benchmark_Count) {
+	api := func(index int) (e error) {
+		return req(me.cli, index)
 	}
-	return RunBenchMark(tps, rounds, interval, apiFunc)
+	return Run_Benchmark(tps, rounds, interval, api)
 }
 
-// BenchMarkCount 基准测试统计
-type BenchMarkCount struct {
-	Begin      time.Time
-	End        time.Time
-	RoundCount map[int]*RoundCount
+type Benchmark_Count struct {
+	Begin       time.Time
+	End         time.Time
+	Round_Count map[int]*Round_Count
 }
-
-// RoundCount 单轮统计
-type RoundCount struct {
-	Begin      time.Time
-	End        time.Time
-	TaskCounts map[int]*TaskCount
+type Round_Count struct {
+	Begin       time.Time
+	End         time.Time
+	Task_Counts map[int]*Task_Count
 }
-
-// TaskCount 单次统计
-type TaskCount struct {
+type Task_Count struct {
 	Begin  time.Time
 	End    time.Time
 	Status bool
 }
 
-// RunBenchMark 一次基准测试
-func RunBenchMark(tps int, rounds int, interval time.Duration, task taskFunc) BenchMarkCount {
-	benchMarkBegin := time.Now()
-	wg := new(sync.WaitGroup)
+func Run_Benchmark(tps int, rounds int, interval time.Duration, task taskFunc) (count Benchmark_Count) {
+	var benchmark_begin = time.Now()
+	var wg = &sync.WaitGroup{}
 	wg.Add(rounds)
-	roundCount := make(map[int]*RoundCount)
-	for r := 0; r < rounds; r++ {
-		go runRound(r, roundCount, tps, wg, task)
-		// 延时等待
+	var round_count = map[int]*Round_Count{}
+	for r := 0; r < rounds; r += 1 {
+		go run_Round(r, round_count, tps, wg, task)
 		time.Sleep(interval * time.Millisecond)
 	}
 	wg.Wait()
-	benchMarkEnd := time.Now()
-	return BenchMarkCount{benchMarkBegin, benchMarkEnd, roundCount}
+	var benchmark_end = time.Now()
+	return Benchmark_Count{benchmark_begin, benchmark_end, round_count}
 }
-
-// runRound 一轮并发
-func runRound(index int, countMap map[int]*RoundCount, tps int, wg *sync.WaitGroup, task taskFunc) {
-	roundWG := new(sync.WaitGroup)
+func run_Round(index int, countMap map[int]*Round_Count, tps int, wg *sync.WaitGroup, task taskFunc) {
+	var roundWG = &sync.WaitGroup{}
 	roundWG.Add(tps)
-	taskCount := make(map[int]*TaskCount)
-	roundBegin := time.Now()
-	for t := 0; t < tps; t++ {
-		go runTask(t, taskCount, roundWG, task)
+	var taskCount = map[int]*Task_Count{}
+	var roundBegin = time.Now()
+	for t := 0; t < tps; t += 1 {
+		go run_Task(t, taskCount, roundWG, task)
 	}
 	roundWG.Wait()
-	roundEnd := time.Now()
-	countMap[index] = &RoundCount{roundBegin, roundEnd, taskCount}
+	var roundEnd = time.Now()
+	countMap[index] = &Round_Count{roundBegin, roundEnd, taskCount}
 	wg.Done()
 }
-
-// runTask 单个任务
-func runTask(index int, countMap map[int]*TaskCount, wg *sync.WaitGroup, task taskFunc) {
-	taskBegin := time.Now()
-	err := task(index)
-	taskEnd := time.Now()
-	isSuccess := true
+func run_Task(index int, countMap map[int]*Task_Count, wg *sync.WaitGroup, task taskFunc) {
+	var taskBegin = time.Now()
+	var err = task(index)
+	var taskEnd = time.Now()
+	var isSuccess = true
 	if err != nil {
 		isSuccess = false
 	}
-	countMap[index] = &TaskCount{taskBegin, taskEnd, isSuccess}
+	countMap[index] = &Task_Count{taskBegin, taskEnd, isSuccess}
 	wg.Done()
 }
