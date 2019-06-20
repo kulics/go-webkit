@@ -12,8 +12,8 @@ const (
 	OPTIONS Method = "OPTIONS"
 )
 
-// NewMethod Method构建函数
-func NewMethod(v string) Method {
+// New_Method Method构建函数
+func New_Method(v string) Method {
 	return Method(v)
 }
 
@@ -22,7 +22,7 @@ func (sf Method) String() string {
 }
 
 // isMethod 判断是否存在的方法
-func isMethod(m Method) (b bool) {
+func is_Method(m Method) (b bool) {
 	switch m {
 	case GET:
 		fallthrough

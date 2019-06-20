@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestBenchMarkSingleAPI(t *testing.T) {
-	bm := New_Web_Benchmark(NewWebClient("http://baidu.com/"))
-	count := bm.Run_Single_API(10, 3, 1000, func(cli *WebClient, index int) error {
-		body, err := cli.FormGET("ping", nil)
+func Test_Benchmark_single_API(t *testing.T) {
+	bm := New_Web_Benchmark(New_Web_Client("http://baidu.com/"))
+	count := bm.Run_single_API(10, 3, 1000, func(cli *Web_Client, index int) error {
+		body, err := cli.Form_GET("ping", nil)
 		if err != nil {
 			return err
 		}

@@ -5,13 +5,13 @@ import "time"
 
 type taskFunc = func(int) error
 type Web_Benchmark struct {
-	cli *WebClient
+	cli *Web_Client
 }
 
-func New_Web_Benchmark(cli *WebClient) (v *Web_Benchmark) {
+func New_Web_Benchmark(cli *Web_Client) (v *Web_Benchmark) {
 	return &Web_Benchmark{cli}
 }
-func (me *Web_Benchmark) Run_Single_API(tps int, rounds int, interval time.Duration, req func(*WebClient, int) error) (count Benchmark_Count) {
+func (me *Web_Benchmark) Run_single_API(tps int, rounds int, interval time.Duration, req func(*Web_Client, int) error) (count Benchmark_Count) {
 	api := func(index int) (e error) {
 		return req(me.cli, index)
 	}

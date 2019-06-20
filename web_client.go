@@ -20,83 +20,83 @@ type Form map[string]interface{}
 type responseHandle = func(resp http.Response) error
 
 const (
-	ContentTypeForm = "application/x-www-form-urlencoded"
-	ContentTypeJSON = "application/json"
+	ContentType_Form = "application/x-www-form-urlencoded"
+	ContentType_JSON = "application/json"
 )
 
-// WebClient web请求辅助工具
-type WebClient struct {
-	host  string
-	token string
-	cli   *http.Client
+// Web_Client web请求辅助工具
+type Web_Client struct {
+	host    string
+	headers map[string]string
+	cli     *http.Client
 }
 
-// NewWebClient WebClient构造函数
-func NewWebClient(host string) *WebClient {
+// New_Web_Client WebClient构造函数
+func New_Web_Client(host string) *Web_Client {
 	jar, _ := cookiejar.New(nil)
-	return &WebClient{host, "", &http.Client{Jar: jar}}
+	return &Web_Client{host, make(map[string]string), &http.Client{Jar: jar}}
 }
 
-// SetToken 设置token
-func (sf *WebClient) SetToken(token string) {
-	sf.token = token
+// Set_Token 设置token
+func (me *Web_Client) Set_Header(key string, value string) {
+	me.headers[key] = value
 }
 
-// Cookies 根据域名获取cookies
-func (sf *WebClient) Cookies(rawURL string) ([]*http.Cookie, error) {
+// Get_Cookies 根据域名获取cookies
+func (me *Web_Client) Get_Cookies(rawURL string) ([]*http.Cookie, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
 	}
-	return sf.cli.Jar.Cookies(u), nil
+	return me.cli.Jar.Cookies(u), nil
 }
 
-// SetCookie 根据域名设置单条cookie
-func (sf *WebClient) SetCookie(rawURL string, name string, value string) error {
+// Set_Cookie 根据域名设置单条cookie
+func (me *Web_Client) Set_Cookie(rawURL string, name string, value string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return err
 	}
-	sf.cli.Jar.SetCookies(u,
+	me.cli.Jar.SetCookies(u,
 		[]*http.Cookie{&http.Cookie{Name: name, Value: value, HttpOnly: true}})
 	return nil
 }
 
-// SetCookies 根据域名设置cookies
-func (sf *WebClient) SetCookies(rawURL string, cookies []*http.Cookie) error {
+// Set_Cookies 根据域名设置cookies
+func (me *Web_Client) Set_Cookies(rawURL string, cookies []*http.Cookie) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return err
 	}
-	sf.cli.Jar.SetCookies(u, cookies)
+	me.cli.Jar.SetCookies(u, cookies)
 	return nil
 }
 
-// HTTPRequest http请求
-func (sf *WebClient) HTTPRequest(method Method, relativePath string,
+// HTTP_request http请求
+func (me *Web_Client) HTTP_request(method Method, relativePath string,
 	contentType string, params io.Reader,
 	header map[string]interface{}) (*http.Response, error) {
 	req, err := http.NewRequest(method.String(),
-		sf.host+relativePath, params)
+		me.host+relativePath, params)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", contentType)
 
-	if sf.token != "" {
-		req.Header.Set("X-Access-Token", sf.token)
+	for k, v := range me.headers {
+		req.Header.Set(k, v)
 	}
 
 	for k, v := range header {
 		req.Header.Set(k, fmt.Sprint(v))
 	}
 
-	return sf.cli.Do(req)
+	return me.cli.Do(req)
 }
 
-func (sf *WebClient) processRequest(method Method, relativePath string,
+func (me *Web_Client) process_request(method Method, relativePath string,
 	contentType string, params io.Reader, handles ...responseHandle) ([]byte, error) {
-	resp, err := sf.HTTPRequest(method, relativePath, contentType, params, nil)
+	resp, err := me.HTTP_request(method, relativePath, contentType, params, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -110,93 +110,93 @@ func (sf *WebClient) processRequest(method Method, relativePath string,
 	return ioutil.ReadAll(resp.Body)
 }
 
-// FormRequest 表单请求
-func (sf *WebClient) FormRequest(method Method, relativePath string, params Form,
+// Form_request 表单请求
+func (me *Web_Client) Form_request(method Method, relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	forms := url.Values{}
 	for k, v := range params {
 		forms.Add(k, fmt.Sprint(v))
 	}
-	return sf.processRequest(method, relativePath, ContentTypeForm,
+	return me.process_request(method, relativePath, ContentType_Form,
 		strings.NewReader(forms.Encode()), handles...)
 }
 
-// FormGET 表单get
-func (sf *WebClient) FormGET(relativePath string, params Form,
+// Form_GET 表单get
+func (me *Web_Client) Form_GET(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
-	return sf.FormRequest(GET, relativePath, params, handles...)
+	return me.Form_request(GET, relativePath, params, handles...)
 }
 
-// FormPOST 表单post
-func (sf *WebClient) FormPOST(relativePath string, params Form,
+// Form_POST 表单post
+func (me *Web_Client) Form_POST(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
-	return sf.FormRequest(POST, relativePath, params, handles...)
+	return me.Form_request(POST, relativePath, params, handles...)
 }
 
-// FormPUT 表单put
-func (sf *WebClient) FormPUT(relativePath string, params Form,
+// Form_PUT 表单put
+func (me *Web_Client) Form_PUT(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
-	return sf.FormRequest(PUT, relativePath, params, handles...)
+	return me.Form_request(PUT, relativePath, params, handles...)
 }
 
-// FormDELETE 表单delete
-func (sf *WebClient) FormDELETE(relativePath string, params Form,
+// Form_DELETE 表单delete
+func (me *Web_Client) Form_DELETE(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
-	return sf.FormRequest(DELETE, relativePath, params, handles...)
+	return me.Form_request(DELETE, relativePath, params, handles...)
 }
 
-// JSONRequest JSON请求
-func (sf *WebClient) JSONRequest(method Method, relativePath string,
+// JSON_request JSON请求
+func (me *Web_Client) JSON_request(method Method, relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
 	bt, err := json.Marshal(params)
 	if err != nil {
 		return err
 	}
-	body, err := sf.processRequest(method, relativePath, ContentTypeJSON, bytes.NewReader(bt), handles...)
+	body, err := me.process_request(method, relativePath, ContentType_JSON, bytes.NewReader(bt), handles...)
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(body, response)
 }
 
-// JSONGET JSON get
-func (sf *WebClient) JSONGET(relativePath string,
+// JSON_GET JSON get
+func (me *Web_Client) JSON_GET(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
-	return sf.JSONRequest(GET, relativePath, params, response, handles...)
+	return me.JSON_request(GET, relativePath, params, response, handles...)
 }
 
-// JSONPOST JSON post
-func (sf *WebClient) JSONPOST(relativePath string,
+// JSON_POST JSON post
+func (me *Web_Client) JSON_POST(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
-	return sf.JSONRequest(POST, relativePath, params, response, handles...)
+	return me.JSON_request(POST, relativePath, params, response, handles...)
 }
 
-// JSONPUT JSON put
-func (sf *WebClient) JSONPUT(relativePath string,
+// JSON_PUT JSON put
+func (me *Web_Client) JSON_PUT(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
-	return sf.JSONRequest(PUT, relativePath, params, response, handles...)
+	return me.JSON_request(PUT, relativePath, params, response, handles...)
 }
 
-// JSONDELETE JSON delete
-func (sf *WebClient) JSONDELETE(relativePath string,
+// JSON_DELETE JSON delete
+func (me *Web_Client) JSON_DELETE(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
-	return sf.JSONRequest(DELETE, relativePath, params, response, handles...)
+	return me.JSON_request(DELETE, relativePath, params, response, handles...)
 }
 
-// FileInfo 发送文件类型
-type FileInfo struct {
+// File_Info 发送文件类型
+type File_Info struct {
 	Field  string
 	Path   string
 	Params map[string]string
 }
 
-// FileUpload 文件上传方法
-func (sf *WebClient) FileUpload(relativePath string, field string,
+// Upload_file 文件上传方法
+func (me *Web_Client) Upload_file(relativePath string, field string,
 	path string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	fileBuffer := &bytes.Buffer{}
@@ -226,14 +226,14 @@ func (sf *WebClient) FileUpload(relativePath string, field string,
 		return nil, err
 	}
 
-	return sf.processRequest(POST, relativePath, bodyWriter.FormDataContentType(),
+	return me.process_request(POST, relativePath, bodyWriter.FormDataContentType(),
 		fileBuffer, handles...)
 }
 
-// FileDownload 文件下载方法
-func (sf *WebClient) FileDownload(relativePath string, savePath string,
+// Download_file 文件下载方法
+func (me *Web_Client) Download_file(relativePath string, savePath string,
 	params Form, handles ...responseHandle) error {
-	body, err := sf.FormGET(relativePath, params)
+	body, err := me.Form_GET(relativePath, params)
 	if err != nil {
 		return err
 	}

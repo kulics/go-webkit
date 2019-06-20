@@ -10,25 +10,25 @@ import (
 // Context 类型别名
 type Context = *gin.Context
 
-// WebServer web服务辅助工具
-type WebServer struct {
+// Web_Server web服务辅助工具
+type Web_Server struct {
 	listen string
 	engine *gin.Engine
 }
 
 // NewWebServerDefault 构建web服务数据对象
 // domain可以为空
-func NewWebServerDefault(listen string) *WebServer {
-	return &WebServer{listen, gin.Default()}
+func New_Web_Server_Default(listen string) *Web_Server {
+	return &Web_Server{listen, gin.Default()}
 }
 
 // Run 运行web服务
-func (sf *WebServer) Run() error {
+func (sf *Web_Server) Run() error {
 	return sf.engine.Run(sf.listen)
 }
 
-// HandleFunc 监听函数
-func (sf *WebServer) HandleFunc(method Method, relativePath string, handle func(ctx Context)) *WebServer {
+// Handle_Func 监听函数
+func (sf *Web_Server) Handle_Func(method Method, relativePath string, handle func(ctx Context)) *Web_Server {
 	switch method {
 	case GET:
 		sf.engine.GET(relativePath, handle)
@@ -46,45 +46,45 @@ func (sf *WebServer) HandleFunc(method Method, relativePath string, handle func(
 	return sf
 }
 
-// HandleFuncGet 监听Get
-func (sf *WebServer) HandleFuncGet(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(GET, relativePath, handle)
+// Handle_GET 监听Get
+func (sf *Web_Server) Handle_GET(relativePath string, handle func(ctx Context)) *Web_Server {
+	return sf.Handle_Func(GET, relativePath, handle)
 }
 
-// HandleFuncPost 监听Post
-func (sf *WebServer) HandleFuncPost(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(POST, relativePath, handle)
+// Handle_POST 监听Post
+func (sf *Web_Server) Handle_POST(relativePath string, handle func(ctx Context)) *Web_Server {
+	return sf.Handle_Func(POST, relativePath, handle)
 }
 
-// HandleFuncPut 监听Put
-func (sf *WebServer) HandleFuncPut(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(PUT, relativePath, handle)
+// Handle_PUT 监听Put
+func (sf *Web_Server) Handle_PUT(relativePath string, handle func(ctx Context)) *Web_Server {
+	return sf.Handle_Func(PUT, relativePath, handle)
 }
 
-// HandleFuncDelete 监听Delete
-func (sf *WebServer) HandleFuncDelete(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(DELETE, relativePath, handle)
+// Handle_DELETE 监听Delete
+func (sf *Web_Server) Handle_DELETE(relativePath string, handle func(ctx Context)) *Web_Server {
+	return sf.Handle_Func(DELETE, relativePath, handle)
 }
 
-// HandleFuncPatch 监听Patch
-func (sf *WebServer) HandleFuncPatch(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(PATCH, relativePath, handle)
+// Handle_PATCH 监听Patch
+func (sf *Web_Server) Handle_PATCH(relativePath string, handle func(ctx Context)) *Web_Server {
+	return sf.Handle_Func(PATCH, relativePath, handle)
 }
 
-// HandleFuncOptions 监听Options
-func (sf *WebServer) HandleFuncOptions(relativePath string, handle func(ctx Context)) *WebServer {
-	return sf.HandleFunc(OPTIONS, relativePath, handle)
+// Handle_OPTIONS 监听Options
+func (sf *Web_Server) Handle_OPTIONS(relativePath string, handle func(ctx Context)) *Web_Server {
+	return sf.Handle_Func(OPTIONS, relativePath, handle)
 }
 
-// HandleStruct 监听结构体，反射街头的http方法以及遍历每个字段的http方法，实现REST形式的API服务
+// Handle_Struct 监听结构体，反射街头的http方法以及遍历每个字段的http方法，实现REST形式的API服务
 // 结构体的方法必须与 Method 类型的名称一致
-func (sf *WebServer) HandleStruct(relativePath string, handle interface{}) *WebServer {
-	sf.handleStruct(relativePath, handle)
+func (sf *Web_Server) Handle_Struct(relativePath string, handle interface{}) *Web_Server {
+	sf.handle_struct(relativePath, handle)
 	return sf
 }
 
-// handleStruct 使用反射遍历结构体的方法和字段，对http方法进行注册
-func (sf *WebServer) handleStruct(relativePath string, handle interface{}) {
+// handle_struct 使用反射遍历结构体的方法和字段，对http方法进行注册
+func (sf *Web_Server) handle_struct(relativePath string, handle interface{}) {
 	rfType := reflect.TypeOf(handle)
 	rfValue := reflect.ValueOf(handle)
 	// 只接受结构体、接口及指针
@@ -93,18 +93,18 @@ func (sf *WebServer) handleStruct(relativePath string, handle interface{}) {
 		// 反射方法
 		for i := 0; i < rfType.NumMethod(); i++ {
 			methodName := rfType.Method(i).Name
-			if !isMethod(NewMethod(methodName)) {
+			if !is_Method(New_Method(methodName)) {
 				continue
 			}
 			handleFunc := func(ctx Context) {
 				rfValue.MethodByName(methodName).Call([]reflect.Value{reflect.ValueOf(ctx)})
 			}
-			sf.HandleFunc(NewMethod(methodName), relativePath, handleFunc)
+			sf.Handle_Func(New_Method(methodName), relativePath, handleFunc)
 		}
 		// 反射字段
 		for i := 0; i < rfType.NumField(); i++ {
 			fieldName := rfType.Field(i).Name
-			sf.handleStruct(relativePath+"/"+strings.ToLower(fieldName[:1])+fieldName[1:],
+			sf.handle_struct(relativePath+"/"+strings.ToLower(fieldName[:1])+fieldName[1:],
 				rfValue.FieldByName(fieldName).Interface())
 		}
 	}
