@@ -35,36 +35,36 @@ type Task_Count struct {
 }
 
 func Run_Benchmark(tps int, rounds int, interval time.Duration, task taskFunc) (count Benchmark_Count) {
-	var benchmark_begin = time.Now()
-	var wg = &sync.WaitGroup{}
+	benchmark_begin := time.Now()
+	wg := &sync.WaitGroup{}
 	wg.Add(rounds)
-	var round_count = map[int]*Round_Count{}
+	round_count := map[int]*Round_Count{}
 	for r := 0; r < rounds; r += 1 {
 		go run_Round(r, round_count, tps, wg, task)
 		time.Sleep(interval * time.Millisecond)
 	}
 	wg.Wait()
-	var benchmark_end = time.Now()
+	benchmark_end := time.Now()
 	return Benchmark_Count{benchmark_begin, benchmark_end, round_count}
 }
 func run_Round(index int, countMap map[int]*Round_Count, tps int, wg *sync.WaitGroup, task taskFunc) {
-	var roundWG = &sync.WaitGroup{}
+	roundWG := &sync.WaitGroup{}
 	roundWG.Add(tps)
-	var taskCount = map[int]*Task_Count{}
-	var roundBegin = time.Now()
+	taskCount := map[int]*Task_Count{}
+	roundBegin := time.Now()
 	for t := 0; t < tps; t += 1 {
 		go run_Task(t, taskCount, roundWG, task)
 	}
 	roundWG.Wait()
-	var roundEnd = time.Now()
+	roundEnd := time.Now()
 	countMap[index] = &Round_Count{roundBegin, roundEnd, taskCount}
 	wg.Done()
 }
 func run_Task(index int, countMap map[int]*Task_Count, wg *sync.WaitGroup, task taskFunc) {
-	var taskBegin = time.Now()
-	var err = task(index)
-	var taskEnd = time.Now()
-	var isSuccess = true
+	taskBegin := time.Now()
+	err := task(index)
+	taskEnd := time.Now()
+	isSuccess := true
 	if err != nil {
 		isSuccess = false
 	}

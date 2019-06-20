@@ -7,16 +7,16 @@ taskFunc => (Int)->(error)
 
 # Web Benchmark 基准测试类型 #
 Web Benchmark -> {
-	cli: ?WebClient
+	cli: ?Web Client
 }
 
 # New Web Benchmark 构建基准测试函数 #
-New Web Benchmark(cli: ?WebClient) -> (v: ?Web Benchmark) {
+New Web Benchmark(cli: ?Web Client) -> (v: ?Web Benchmark) {
 	<- (Web Benchmark{cli}?)
 }
 
-# Run Single API 单个API基准测试 #
-(me: ?Web Benchmark) Run Single API(tps: Int, rounds: Int, interval: time.Duration, req: (?WebClient, Int)->(error) ) -> (count:Benchmark Count) {
+# Run single API 单个API基准测试 #
+(me: ?Web Benchmark) Run single API(tps: Int, rounds: Int, interval: time.Duration, req: (?Web Client, Int)->(error) ) -> (count:Benchmark Count) {
 	api(index: Int) -> (e:error) {
 		<- (req(me.cli, index))
 	}
