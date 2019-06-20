@@ -1,41 +1,47 @@
 package webkit
 
-// Method http方法类型
 type Method string
 
-const (
-	GET     Method = "GET"
-	POST    Method = "POST"
-	PUT     Method = "PUT"
-	DELETE  Method = "DELETE"
-	PATCH   Method = "PATCH"
-	OPTIONS Method = "OPTIONS"
-)
+const GET Method = "GET"
+const POST Method = "POST"
+const PUT Method = "PUT"
+const DELETE Method = "DELETE"
+const PATCH Method = "PATCH"
+const OPTIONS Method = "OPTIONS"
 
-// New_Method Method构建函数
-func New_Method(v string) Method {
+func New_Method(v string) (r Method) {
 	return Method(v)
 }
-
-func (sf Method) String() string {
-	return string(sf)
+func (me Method) String() (r string) {
+	return string(me)
 }
-
-// isMethod 判断是否存在的方法
-func is_Method(m Method) (b bool) {
+func is_Method(m Method) (r bool) {
+	b := false
 	switch m {
 	case GET:
-		fallthrough
+		{
+			b = true
+		}
 	case POST:
-		fallthrough
+		{
+			b = true
+		}
 	case PUT:
-		fallthrough
+		{
+			b = true
+		}
 	case DELETE:
-		fallthrough
+		{
+			b = true
+		}
 	case PATCH:
-		fallthrough
+		{
+			b = true
+		}
 	case OPTIONS:
-		b = true
+		{
+			b = true
+		}
 	}
-	return
+	return b
 }
