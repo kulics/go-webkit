@@ -81,7 +81,7 @@ run Task(index:Int, countMap:[Int]?Task Count, wg:?sync.WaitGroup, task:taskFunc
 	err := task(index)
 	taskEnd := time.Now()
 	isSuccess := true
-	? err >< () {
+	? err >< Nil {
 		isSuccess = false
 	}
 	countMap[index] = Task Count{taskBegin, taskEnd, isSuccess}?
