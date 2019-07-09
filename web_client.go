@@ -24,26 +24,26 @@ const (
 	ContentType_JSON = "application/json"
 )
 
-// Web_Client web请求辅助工具
-type Web_Client struct {
+// WebClient web请求辅助工具
+type WebClient struct {
 	host    string
 	headers map[string]string
 	cli     *http.Client
 }
 
-// New_Web_Client WebClient构造函数
-func New_Web_Client(host string) *Web_Client {
+// NewWebClient WebClient构造函数
+func NewWebClient(host string) *WebClient {
 	jar, _ := cookiejar.New(nil)
-	return &Web_Client{host, make(map[string]string), &http.Client{Jar: jar}}
+	return &WebClient{host, make(map[string]string), &http.Client{Jar: jar}}
 }
 
 // Set_Token 设置token
-func (me *Web_Client) Set_Header(key string, value string) {
+func (me *WebClient) SetHeader(key string, value string) {
 	me.headers[key] = value
 }
 
-// Get_Cookies 根据域名获取cookies
-func (me *Web_Client) Get_Cookies(rawURL string) ([]*http.Cookie, error) {
+// GetCookies 根据域名获取cookies
+func (me *WebClient) GetCookies(rawURL string) ([]*http.Cookie, error) {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
@@ -51,8 +51,8 @@ func (me *Web_Client) Get_Cookies(rawURL string) ([]*http.Cookie, error) {
 	return me.cli.Jar.Cookies(u), nil
 }
 
-// Set_Cookie 根据域名设置单条cookie
-func (me *Web_Client) Set_Cookie(rawURL string, name string, value string) error {
+// SetCookie 根据域名设置单条cookie
+func (me *WebClient) SetCookie(rawURL string, name string, value string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return err
@@ -62,8 +62,8 @@ func (me *Web_Client) Set_Cookie(rawURL string, name string, value string) error
 	return nil
 }
 
-// Set_Cookies 根据域名设置cookies
-func (me *Web_Client) Set_Cookies(rawURL string, cookies []*http.Cookie) error {
+// SetCookies 根据域名设置cookies
+func (me *WebClient) SetCookies(rawURL string, cookies []*http.Cookie) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (me *Web_Client) Set_Cookies(rawURL string, cookies []*http.Cookie) error {
 }
 
 // HTTP_request http请求
-func (me *Web_Client) HTTP_request(method Method, relativePath string,
+func (me *WebClient) HTTP_request(method Method, relativePath string,
 	contentType string, params io.Reader,
 	header map[string]interface{}) (*http.Response, error) {
 	req, err := http.NewRequest(method.String(),
@@ -94,7 +94,7 @@ func (me *Web_Client) HTTP_request(method Method, relativePath string,
 	return me.cli.Do(req)
 }
 
-func (me *Web_Client) process_request(method Method, relativePath string,
+func (me *WebClient) processRequest(method Method, relativePath string,
 	contentType string, params io.Reader, handles ...responseHandle) ([]byte, error) {
 	resp, err := me.HTTP_request(method, relativePath, contentType, params, nil)
 	if err != nil {
@@ -111,49 +111,49 @@ func (me *Web_Client) process_request(method Method, relativePath string,
 }
 
 // Form_request 表单请求
-func (me *Web_Client) Form_request(method Method, relativePath string, params Form,
+func (me *WebClient) Form_request(method Method, relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	forms := url.Values{}
 	for k, v := range params {
 		forms.Add(k, fmt.Sprint(v))
 	}
-	return me.process_request(method, relativePath, ContentType_Form,
+	return me.processRequest(method, relativePath, ContentType_Form,
 		strings.NewReader(forms.Encode()), handles...)
 }
 
 // Form_GET 表单get
-func (me *Web_Client) Form_GET(relativePath string, params Form,
+func (me *WebClient) Form_GET(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	return me.Form_request(GET, relativePath, params, handles...)
 }
 
 // Form_POST 表单post
-func (me *Web_Client) Form_POST(relativePath string, params Form,
+func (me *WebClient) Form_POST(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	return me.Form_request(POST, relativePath, params, handles...)
 }
 
 // Form_PUT 表单put
-func (me *Web_Client) Form_PUT(relativePath string, params Form,
+func (me *WebClient) Form_PUT(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	return me.Form_request(PUT, relativePath, params, handles...)
 }
 
 // Form_DELETE 表单delete
-func (me *Web_Client) Form_DELETE(relativePath string, params Form,
+func (me *WebClient) Form_DELETE(relativePath string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	return me.Form_request(DELETE, relativePath, params, handles...)
 }
 
 // JSON_request JSON请求
-func (me *Web_Client) JSON_request(method Method, relativePath string,
+func (me *WebClient) JSON_request(method Method, relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
 	bt, err := json.Marshal(params)
 	if err != nil {
 		return err
 	}
-	body, err := me.process_request(method, relativePath, ContentType_JSON, bytes.NewReader(bt), handles...)
+	body, err := me.processRequest(method, relativePath, ContentType_JSON, bytes.NewReader(bt), handles...)
 	if err != nil {
 		return err
 	}
@@ -161,28 +161,28 @@ func (me *Web_Client) JSON_request(method Method, relativePath string,
 }
 
 // JSON_GET JSON get
-func (me *Web_Client) JSON_GET(relativePath string,
+func (me *WebClient) JSON_GET(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
 	return me.JSON_request(GET, relativePath, params, response, handles...)
 }
 
 // JSON_POST JSON post
-func (me *Web_Client) JSON_POST(relativePath string,
+func (me *WebClient) JSON_POST(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
 	return me.JSON_request(POST, relativePath, params, response, handles...)
 }
 
 // JSON_PUT JSON put
-func (me *Web_Client) JSON_PUT(relativePath string,
+func (me *WebClient) JSON_PUT(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
 	return me.JSON_request(PUT, relativePath, params, response, handles...)
 }
 
 // JSON_DELETE JSON delete
-func (me *Web_Client) JSON_DELETE(relativePath string,
+func (me *WebClient) JSON_DELETE(relativePath string,
 	params interface{}, response interface{},
 	handles ...responseHandle) error {
 	return me.JSON_request(DELETE, relativePath, params, response, handles...)
@@ -195,8 +195,8 @@ type File_Info struct {
 	Params map[string]string
 }
 
-// Upload_file 文件上传方法
-func (me *Web_Client) Upload_file(relativePath string, field string,
+// UploadFile 文件上传方法
+func (me *WebClient) UploadFile(relativePath string, field string,
 	path string, params Form,
 	handles ...responseHandle) ([]byte, error) {
 	fileBuffer := &bytes.Buffer{}
@@ -226,12 +226,12 @@ func (me *Web_Client) Upload_file(relativePath string, field string,
 		return nil, err
 	}
 
-	return me.process_request(POST, relativePath, bodyWriter.FormDataContentType(),
+	return me.processRequest(POST, relativePath, bodyWriter.FormDataContentType(),
 		fileBuffer, handles...)
 }
 
-// Download_file 文件下载方法
-func (me *Web_Client) Download_file(relativePath string, savePath string,
+// DownloadFile 文件下载方法
+func (me *WebClient) DownloadFile(relativePath string, savePath string,
 	params Form, handles ...responseHandle) error {
 	body, err := me.Form_GET(relativePath, params)
 	if err != nil {

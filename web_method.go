@@ -9,18 +9,17 @@ const DELETE Method = "DELETE"
 const PATCH Method = "PATCH"
 const OPTIONS Method = "OPTIONS"
 
-func New_Method(v string) (r Method) {
+func NewMethod(v string) (r Method) {
 	return Method(v)
 }
 func (me Method) String() (r string) {
 	return string(me)
 }
-func is_Method(m Method) (r bool) {
+func isMethod(m Method) (r bool) {
 	b := false
 	switch m {
 	case GET:
 		{
-			b = true
 		}
 	case POST:
 		{

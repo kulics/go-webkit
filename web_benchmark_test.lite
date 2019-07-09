@@ -5,10 +5,10 @@
 }
 
 # 测试单api #
-Test Benchmark single API(t: ?testing.T) -> () {
-	bm := New Web Benchmark(New Web Client("http://baidu.com/"))
-	count := bm.Run single API(10, 3, 1000, (cli:?Web Client, index:Int) -> (err:error) {
-		(body, err) := cli.Form GET("ping", Nil)
+TestBenchmarkSingleAPI(t: ?testing.T) -> () {
+	bm := NewWebBenchmark(NewWebClient("http://baidu.com/"))
+	count := bm.RunSingleAPI(10, 3, 1000, (cli:?WebClient, index:Int) -> (err:error) {
+		(body, err) := cli.Form_GET("ping", Nil)
 		? err >< Nil {
 			<- (err)
 		}

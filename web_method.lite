@@ -10,30 +10,31 @@ DELETE  :Method : "DELETE"
 PATCH   :Method : "PATCH"
 OPTIONS :Method : "OPTIONS"
 
-# New_Method Method构建函数 #
-New Method(v:Str) -> (r:Method) {
+# NewMethod Method构建函数 #
+NewMethod(v:Str) -> (r:Method) {
 	<- (Method(v))
 }
 
-(me:Method) String() -> (r:Str) {
-	<- (string(me))
-}
+(me:Method) -> {
+	String() -> (r:Str) {
+		<- (string(me))
+	}
+} 
 
 # isMethod 判断是否存在的方法 #
-is Method(m:Method) -> (r:Bool) {
+isMethod(m:Method) -> (r:Bool) {
     b := False
 	m ? GET {
-        b = True
 	} POST {
-        b = True
-    } PUT {
-        b = True
-    } DELETE {
-        b = True
-    } PATCH {
-        b = True
-    } OPTIONS {
 		b = True
+	} PUT {
+		b = True
+	} DELETE {
+		b = True
+	} PATCH {
+		b = True
+	} OPTIONS {
+        b = True
 	}
 	<- (b)
 }

@@ -4,63 +4,63 @@ import "sync"
 import "time"
 
 type taskFunc = func(int) error
-type Web_Benchmark struct {
-	cli *Web_Client
+type WebBenchmark struct {
+	cli *WebClient
 }
 
-func New_Web_Benchmark(cli *Web_Client) (v *Web_Benchmark) {
-	return &Web_Benchmark{cli}
+func NewWebBenchmark(cli *WebClient) (v *WebBenchmark) {
+	return &WebBenchmark{cli}
 }
-func (me *Web_Benchmark) Run_single_API(tps int, rounds int, interval time.Duration, req func(*Web_Client, int) error) (count Benchmark_Count) {
+func (me *WebBenchmark) RunSingleAPI(tps int, rounds int, interval time.Duration, req func(*WebClient, int) error) (count BenchmarkCount) {
 	api := func(index int) (e error) {
 		return req(me.cli, index)
 	}
-	return Run_Benchmark(tps, rounds, interval, api)
+	return RunBenchmark(tps, rounds, interval, api)
 }
 
-type Benchmark_Count struct {
-	Begin       time.Time
-	End         time.Time
-	Round_Count map[int]*Round_Count
+type BenchmarkCount struct {
+	Begin      time.Time
+	End        time.Time
+	RoundCount map[int]*RoundCount
 }
-type Round_Count struct {
-	Begin       time.Time
-	End         time.Time
-	Task_Counts map[int]*Task_Count
+type RoundCount struct {
+	Begin      time.Time
+	End        time.Time
+	TaskCounts map[int]*TaskCount
 }
-type Task_Count struct {
+type TaskCount struct {
 	Begin  time.Time
 	End    time.Time
 	Status bool
 }
 
-func Run_Benchmark(tps int, rounds int, interval time.Duration, task taskFunc) (count Benchmark_Count) {
-	benchmark_begin := time.Now()
+func RunBenchmark(tps int, rounds int, interval time.Duration, task taskFunc) (count BenchmarkCount) {
+	benchmarkBegin := time.Now()
 	wg := &sync.WaitGroup{}
 	wg.Add(rounds)
-	round_count := map[int]*Round_Count{}
+	roundCount := map[int]*RoundCount{}
 	for r := 0; r < rounds; r += 1 {
-		go run_Round(r, round_count, tps, wg, task)
+		go runRound(r, roundCount, tps, wg, task)
 		time.Sleep(interval * time.Millisecond)
 	}
 	wg.Wait()
-	benchmark_end := time.Now()
-	return Benchmark_Count{benchmark_begin, benchmark_end, round_count}
+	benchmarkEnd := time.Now()
+	return BenchmarkCount{benchmarkBegin, benchmarkEnd, roundCount}
 }
-func run_Round(index int, countMap map[int]*Round_Count, tps int, wg *sync.WaitGroup, task taskFunc) {
+func runRound(index int, countMap map[int]*RoundCount, tps int, wg *sync.WaitGroup, task taskFunc) {
 	roundWG := &sync.WaitGroup{}
 	roundWG.Add(tps)
-	taskCount := map[int]*Task_Count{}
+	taskCount := map[int]*TaskCount{}
 	roundBegin := time.Now()
 	for t := 0; t < tps; t += 1 {
-		go run_Task(t, taskCount, roundWG, task)
+		go runTask(t, taskCount, roundWG, task)
 	}
 	roundWG.Wait()
 	roundEnd := time.Now()
-	countMap[index] = &Round_Count{roundBegin, roundEnd, taskCount}
+	countMap[index] = &RoundCount{roundBegin, roundEnd, taskCount}
 	wg.Done()
 }
-func run_Task(index int, countMap map[int]*Task_Count, wg *sync.WaitGroup, task taskFunc) {
+func runTask(index int, countMap map[int]*TaskCount, wg *sync.WaitGroup, task taskFunc) {
 	taskBegin := time.Now()
 	err := task(index)
 	taskEnd := time.Now()
@@ -68,6 +68,6 @@ func run_Task(index int, countMap map[int]*Task_Count, wg *sync.WaitGroup, task 
 	if err != nil {
 		isSuccess = false
 	}
-	countMap[index] = &Task_Count{taskBegin, taskEnd, isSuccess}
+	countMap[index] = &TaskCount{taskBegin, taskEnd, isSuccess}
 	wg.Done()
 }

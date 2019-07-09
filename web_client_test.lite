@@ -1,0 +1,26 @@
+"webkit" {
+	"fmt"
+	"testing"
+}
+
+TestUploadFile(t: ?testing.T) -> () {
+	cli := NewWebClient("http://localhost:8080/")
+	(body, err) := cli.UploadFile("file", "file", "README.md",
+		[Str]Any{["path"]"read.me"})
+	? err >< Nil {
+		fmt.Println(err)
+		<- ()
+	}
+	fmt.Println(string(body))
+}
+
+TestDownloadFile(t:?testing.T) -> () {
+	cli := NewWebClient("http://localhost:8080/")
+	err := cli.DownloadFile(
+		"file?path=../web_client.go",
+		"./tempFile", [Str]Any{})
+	? err >< Nil {
+		fmt.Println(err)
+		<- ()
+	}
+}
