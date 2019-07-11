@@ -3,7 +3,7 @@
 	"time"
 }
 
-taskFunc => (Int)->(error) 
+taskFunc => (Int->error) 
 
 # WebBenchmark 基准测试类型 #
 WebBenchmark -> {
@@ -11,17 +11,17 @@ WebBenchmark -> {
 }
 
 # NewWebBenchmark 构建基准测试函数 #
-NewWebBenchmark(cli: ?WebClient) -> (v: ?WebBenchmark) {
-	<- (WebBenchmark{cli}?)
+NewWebBenchmark(cli: ?WebClient -> v: ?WebBenchmark) {
+	<- WebBenchmark{cli}?
 }
 
 # Run single API 单个API基准测试 #
-(me: ?WebBenchmark) -> {
-	RunSingleAPI(tps: Int, rounds: Int, interval: time.Duration, req: (?WebClient, Int)->(error) ) -> (count:BenchmarkCount) {
-		api(index: Int) -> (e:error) {
-			<- (req(me.cli, index))
+me: ?WebBenchmark -> {
+	RunSingleAPI(tps: Int, rounds: Int, interval: time.Duration, req: (?WebClient, Int->error) -> count: BenchmarkCount) {
+		api(index: Int -> e: error) {
+			<- req(me.cli, index)
 		}
-		<- (RunBenchmark(tps, rounds, interval, api))
+		<- RunBenchmark(tps, rounds, interval, api)
 	}
 }
 
@@ -47,7 +47,7 @@ TaskCount -> {
 }
 
 # RunBenchmark 一次基准测试 #
-RunBenchmark(tps: Int, rounds: Int, interval: time.Duration, task: taskFunc) -> (count: BenchmarkCount) {
+RunBenchmark(tps: Int, rounds: Int, interval: time.Duration, task: taskFunc -> count: BenchmarkCount) {
 	benchmarkBegin := time.Now()
 	wg := sync.WaitGroup{}?
 	wg.Add(rounds)
@@ -59,11 +59,11 @@ RunBenchmark(tps: Int, rounds: Int, interval: time.Duration, task: taskFunc) -> 
 	}
 	wg.Wait()
 	benchmarkEnd := time.Now()
-	<- (BenchmarkCount{benchmarkBegin, benchmarkEnd, roundCount})
+	<- BenchmarkCount{benchmarkBegin, benchmarkEnd, roundCount}
 }
 
 # runRound 一轮并发 #
-runRound(index:Int, countMap:[Int]?RoundCount, tps:Int, wg:?sync.WaitGroup, task:taskFunc) -> () {
+runRound(index:Int, countMap:[Int]?RoundCount, tps:Int, wg:?sync.WaitGroup, task:taskFunc ->) {
 	roundWG := sync.WaitGroup{}?
 	roundWG.Add(tps)
 	taskCount := [Int]?TaskCount{}
@@ -78,7 +78,7 @@ runRound(index:Int, countMap:[Int]?RoundCount, tps:Int, wg:?sync.WaitGroup, task
 }
 
 # runTask 单个任务 #
-runTask(index:Int, countMap:[Int]?TaskCount, wg:?sync.WaitGroup, task:taskFunc) -> () {
+runTask(index:Int, countMap:[Int]?TaskCount, wg:?sync.WaitGroup, task:taskFunc ->) {
 	taskBegin := time.Now()
 	err := task(index)
 	taskEnd := time.Now()

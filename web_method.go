@@ -20,6 +20,7 @@ func isMethod(m Method) (r bool) {
 	switch m {
 	case GET:
 		{
+			b = true
 		}
 	case POST:
 		{
@@ -41,6 +42,7 @@ func isMethod(m Method) (r bool) {
 		{
 			b = true
 		}
+
 	}
 	return b
 }
