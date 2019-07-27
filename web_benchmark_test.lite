@@ -5,18 +5,18 @@
 }
 
 # 测试单api #
-TestBenchmarkSingleAPI(t: ?testing.T ->) {
-	bm := NewWebBenchmark(NewWebClient("http://baidu.com/"))
-	count := bm.RunSingleAPI(10, 3, 1000, (cli:?WebClient, index:Int -> err:error) {
-		(body, err) := cli.Form_GET("ping", Nil)
-		? err >< Nil {
+TestBenchmarkSingleAPI(t ?testing.T ->) {
+	bm = NewWebBenchmark(NewWebClient("http://baidu.com/"))
+	count = bm.RunSingleAPI(10, 3, 1000, (cli ?WebClient, index int -> err error) {
+		body, err = cli.Form_GET("ping", nil)
+		? err >< nil {
 			<- err
 		}
 		fmt.Println(string(body))
-		<- Nil
+		<- nil
 	})
-	(bts, err) := json.Marshal(count)
-	? err >< Nil {
+	bts, err = json.Marshal(count)
+	? err >< nil {
 		fmt.Println(err)
 	}
 	fmt.Println(string(bts))
