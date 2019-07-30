@@ -94,7 +94,7 @@ me ?WebServer -> {
 			# 反射字段 #
 			i @ 0 ..< rfType.NumField() {
 				fieldName = rfType.Field(i).Name
-				me.handleStruct(relativePath+"/"+strings.ToLower(fieldName[..<1])+fieldName[1..<=],
+				me.handleStruct(relativePath+"/"+strings.ToLower(fieldName.(..<1))+fieldName.(1..<=),
 					rfValue.FieldByName(fieldName).Interface())
 			}
 		}
