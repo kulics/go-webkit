@@ -39,7 +39,7 @@ func RunBenchmark(tps int, rounds int, interval time.Duration, task taskFunc) (c
 	wg := &sync.WaitGroup{}
 	wg.Add(rounds)
 	roundCount := map[int]*RoundCount{}
-	for r := 0; r < rounds; r += 1 {
+	for r := 0; r <= rounds-1; r += 1 {
 		go runRound(r, roundCount, tps, wg, task)
 		time.Sleep(interval * time.Millisecond)
 	}
@@ -52,7 +52,7 @@ func runRound(index int, countMap map[int]*RoundCount, tps int, wg *sync.WaitGro
 	roundWG.Add(tps)
 	taskCount := map[int]*TaskCount{}
 	roundBegin := time.Now()
-	for t := 0; t < tps; t += 1 {
+	for t := 0; t <= tps-1; t += 1 {
 		go runTask(t, taskCount, roundWG, task)
 	}
 	roundWG.Wait()

@@ -82,7 +82,7 @@ func (me *WebServer) handleStruct(relativePath string, handle interface{}) {
 	switch rfType.Kind() {
 	case reflect.Ptr:
 		{
-			for i := 0; i < rfType.NumMethod(); i += 1 {
+			for i := 0; i <= rfType.NumMethod()-1; i += 1 {
 				methodName := rfType.Method(i).Name
 				if !isMethod(NewMethod(methodName)) {
 					continue
@@ -92,14 +92,14 @@ func (me *WebServer) handleStruct(relativePath string, handle interface{}) {
 				}
 				me.HandleFunc(NewMethod(methodName), relativePath, handleFunc)
 			}
-			for i := 0; i < rfType.NumField(); i += 1 {
+			for i := 0; i <= rfType.NumField()-1; i += 1 {
 				fieldName := rfType.Field(i).Name
 				me.handleStruct(relativePath+"/"+strings.ToLower(fieldName[:1])+fieldName[1:], rfValue.FieldByName(fieldName).Interface())
 			}
 		}
 	case reflect.Interface:
 		{
-			for i := 0; i < rfType.NumMethod(); i += 1 {
+			for i := 0; i <= rfType.NumMethod()-1; i += 1 {
 				methodName := rfType.Method(i).Name
 				if !isMethod(NewMethod(methodName)) {
 					continue
@@ -109,14 +109,14 @@ func (me *WebServer) handleStruct(relativePath string, handle interface{}) {
 				}
 				me.HandleFunc(NewMethod(methodName), relativePath, handleFunc)
 			}
-			for i := 0; i < rfType.NumField(); i += 1 {
+			for i := 0; i <= rfType.NumField()-1; i += 1 {
 				fieldName := rfType.Field(i).Name
 				me.handleStruct(relativePath+"/"+strings.ToLower(fieldName[:1])+fieldName[1:], rfValue.FieldByName(fieldName).Interface())
 			}
 		}
 	case reflect.Struct:
 		{
-			for i := 0; i < rfType.NumMethod(); i += 1 {
+			for i := 0; i <= rfType.NumMethod()-1; i += 1 {
 				methodName := rfType.Method(i).Name
 				if !isMethod(NewMethod(methodName)) {
 					continue
@@ -126,7 +126,7 @@ func (me *WebServer) handleStruct(relativePath string, handle interface{}) {
 				}
 				me.HandleFunc(NewMethod(methodName), relativePath, handleFunc)
 			}
-			for i := 0; i < rfType.NumField(); i += 1 {
+			for i := 0; i <= rfType.NumField()-1; i += 1 {
 				fieldName := rfType.Field(i).Name
 				me.handleStruct(relativePath+"/"+strings.ToLower(fieldName[:1])+fieldName[1:], rfValue.FieldByName(fieldName).Interface())
 			}

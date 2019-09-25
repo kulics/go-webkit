@@ -1,7 +1,7 @@
 "webkit" {}
 
 # Method http方法类型 #
-Method -> str
+Method := str
 
 GET     Method : "GET"
 POST    Method : "POST"
@@ -11,18 +11,18 @@ PATCH   Method : "PATCH"
 OPTIONS Method : "OPTIONS"
 
 # NewMethod Method构建函数 #
-NewMethod(v str -> r Method) {
+NewMethod : (v str -> r Method) {
 	<- Method(v)
 }
 
-me Method -> {
-	String(-> r str) {
+me Method % {
+	String : (-> r str) {
 		<- string(me)
 	}
 }
 
 # isMethod 判断是否存在的方法 #
-isMethod(m Method -> r bool) {
+isMethod : (m Method -> r bool) {
     b = false
 	m ? GET,POST,PUT,DELETE,PATCH,OPTIONS {
         b = true
