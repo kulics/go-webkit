@@ -8,14 +8,14 @@ type WebBenchmark struct {
 	cli *WebClient
 }
 
-func NewWebBenchmark(cli *WebClient) (v *WebBenchmark) {
-	return &WebBenchmark{cli}
-}
 func (me *WebBenchmark) RunSingleAPI(tps int, rounds int, interval time.Duration, req func(*WebClient, int) error) (count BenchmarkCount) {
 	api := func(index int) (e error) {
 		return req(me.cli, index)
 	}
 	return RunBenchmark(tps, rounds, interval, api)
+}
+func NewWebBenchmark(cli *WebClient) (v *WebBenchmark) {
+	return &WebBenchmark{cli}
 }
 
 type BenchmarkCount struct {

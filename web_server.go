@@ -5,10 +5,6 @@ import "strings"
 import "github.com/gin-gonic/gin"
 
 type Context = *gin.Context
-type WebServer struct {
-	listen string
-	engine *gin.Engine
-}
 
 func NewWebServerDefault(listen string) (v *WebServer) {
 	srv := &WebServer{}
@@ -16,6 +12,12 @@ func NewWebServerDefault(listen string) (v *WebServer) {
 	srv.engine = gin.Default()
 	return srv
 }
+
+type WebServer struct {
+	listen string
+	engine *gin.Engine
+}
+
 func (me *WebServer) Run() (e error) {
 	return me.engine.Run(me.listen)
 }
