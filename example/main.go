@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kulics/go_webkit"
+	"github.com/kulics/go-webkit"
 )
 
 func main() {
